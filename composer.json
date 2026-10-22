@@ -1,9 +1,10 @@
 {
   "name": "hyperized/hostfact",
-  "description": "Hostfact 2.7 API Implementation",
+  "description": "Hostfact 3.0 API Implementation for Laravel",
   "keywords": [
+    "hyperized",
     "hostfact",
-    "hostfact-api"
+    "api"
   ],
   "type": "library",
   "minimum-stability": "stable",
@@ -15,21 +16,18 @@
     }
   ],
   "require": {
-    "php": "^7.2.5",
-    "illuminate/support": "^7.2|^8.0",
-    "ext-curl": "*",
-    "ext-json": "*"
+    "php": "^8.4.1",
+    "guzzlehttp/guzzle": "^7.5 || ^8.0",
+    "hyperized/value-objects": "^2.0.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^8.0",
-    "squizlabs/php_codesniffer": "^3.5",
-    "povils/phpmnd": "^2.0",
-    "bmitch/churn-php": "^1.0.3",
-    "phan/phan": "^3.0 || ^5.0",
-    "phpstan/phpstan": "^0.12.0 || ^1.0.0",
-    "phpmd/phpmd": "^2.8",
-    "infection/infection": "^0.15.0",
-    "vimeo/psalm": "^3.8 || ^4.0"
+    "phpunit/phpunit": "^13.0",
+    "phpmd/phpmd": "^2.14 || ^3.0",
+    "orchestra/testbench": "^11.0",
+    "phpstan/phpstan": "^2.0",
+    "squizlabs/php_codesniffer": "^3.8 || ^4.0",
+    "povils/phpmnd": "^3.0",
+    "infection/infection": "^0.32 || ^0.34 || ^0.35"
   },
   "autoload": {
     "psr-4": {
@@ -44,42 +42,49 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Hyperized\\Hostfact\\HostfactServiceProvider"
+        "Hyperized\\Hostfact\\Providers\\HostfactServiceProvider"
       ],
       "aliases": {
-        "Hostfact": "Hyperized\\Hostfact\\HostfactServiceProvider"
+        "Hostfact": "Hyperized\\Hostfact\\Providers\\HostfactServiceProvider"
       }
     }
   },
   "scripts": {
-    "phpunit": "vendor/phpunit/phpunit/phpunit --configuration phpunit.xml.dist",
-    "phan": "vendor/bin/phan --allow-polyfill-parser",
-    "phpmd": "vendor/bin/phpmd --strict src text cyclomatic.xml",
-    "phpcs": "vendor/bin/phpcs src --standard=PSR2 || true",
-    "phpcbf": "vendor/bin/phpcbf src",
-    "phpmnd": "vendor/bin/phpmnd src",
-    "churn": "vendor/bin/churn run src",
-    "phpstan": "vendor/bin/phpstan --level=7  analyse src tests",
-    "infection": "vendor/bin/infection",
-    "psalm": "vendor/bin/psalm",
-    "test-github": [
-      "@phpunit",
-      "@phpmd",
-      "@phpmnd",
-      "@churn",
+    "test": [
+      "@phpmd --version",
+      "@phpmd --strict src text cyclomatic.xml",
+      "@phpstan --version",
+      "@phpstan analyse",
+      "@phpcs --version",
+      "@phpcs src --standard=PSR2",
+      "@phpmnd --version",
+      "@phpmnd src",
+      "@phpunit --version",
+      "@phpunit  --configuration phpunit.xml.dist",
+      "@infection --version",
       "@infection"
     ],
-    "test": [
-      "@phpunit",
-      "@phan",
-      "@phpmd",
-      "@phpcbf",
-      "@phpcs",
-      "@phpmnd",
-      "@churn",
-      "@phpstan",
-      "@infection",
-      "@psalm"
-    ]
+    "test-github": [
+      "@test"
+    ],
+    "phpunit": "vendor/phpunit/phpunit/phpunit",
+    "phpmd": "vendor/bin/phpmd",
+    "phpstan": "vendor/bin/phpstan",
+    "phpcs": "vendor/bin/phpcs",
+    "phpmnd": "vendor/bin/phpmnd src",
+    "infection": "vendor/bin/infection",
+    "major": [
+      "composer update",
+      "@update-major",
+      "@update-major-dev"
+    ],
+    "update-major": "jq -r '.require | keys[]' composer.json | xargs composer require --update-with-all-dependencies",
+    "update-major-dev": "jq -r '.\"require-dev\" | keys[]' composer.json | xargs composer require --dev --update-with-all-dependencies"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/package-versions-deprecated": true,
+      "infection/extension-installer": true
+    }
   }
 }
